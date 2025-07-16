@@ -2,46 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Airdrop Claim Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
-  <!-- WalletConnect & Ethers.js -->
-  <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+  <!-- Ethers.js -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+  <!-- Web3Modal v2 and Universal Provider -->
+  <script src="https://unpkg.com/@web3modal/ethereum@2.6.0/dist/index.umd.min.js"></script>
+  <script src="https://unpkg.com/@web3modal/html@2.6.0/dist/index.umd.min.js"></script>
 
   <style>
     body {
       font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      margin: 0; padding: 0;
-      display: flex; height: 100vh;
-      align-items: center; justify-content: center;
-      color: white;
+      margin:0; padding:0;
+      display:flex;height:100vh;align-items:center;justify-content:center;
+      color:white;
     }
     .card {
       background: rgba(255,255,255,0.08);
-      padding: 2rem; border-radius: 12px;
-      max-width: 400px; width: 90%;
-      text-align: center;
+      padding:2rem; border-radius:12px;
+      max-width:400px; width:90%; text-align:center;
       box-shadow: 0 0 30px rgba(0,0,0,0.3);
     }
-    h1 { margin-bottom: 0.5rem; color: #00ffae; }
-    p { opacity: 0.9; margin-bottom: 1.5rem; }
-    .amount {
-      font-size: 2rem; font-weight: bold;
-      margin-bottom: 1.5rem; color: #00ffae;
-    }
+    h1 { color:#00ffae; margin-bottom:0.5rem; }
+    p { opacity:0.9; margin-bottom:1.5rem; }
+    .amount { font-size:2rem; font-weight:bold; color:#00ffae; margin-bottom:1.5rem; }
     button {
-      background: #00ffae; color: #000;
-      border: none; padding: 12px 24px;
-      font-weight: 600; border-radius: 8px;
-      cursor: pointer; margin: 0.5rem;
-      transition: background 0.3s;
+      background:#00ffae;color:#000;border:none;
+      padding:12px 24px;font-size:1rem;font-weight:600;
+      border-radius:8px;cursor:pointer;margin:0.5rem;
+      transition:background 0.3s;
     }
-    button:hover { background: #00c98e; }
-    #status { margin-top: 1rem; font-size: 0.9rem; color: #ffb74d; }
-    .footer { margin-top: 2rem; font-size: 0.8rem; color: #ccc; }
+    button:hover { background:#00c98e; }
+    #status { margin-top:1rem; font-size:0.9rem; color:#ffb74d; }
+    .footer { margin-top:2rem; font-size:0.8rem; color:#ccc; }
   </style>
 </head>
 <body>
@@ -49,8 +45,7 @@
   <div class="card">
     <h1>🎉 Airdrop Claim Portal</h1>
     <p>Connect your wallet to verify eligibility and claim your airdrop rewards.</p>
-    <div class="amount">💰 1,000 </div>
-
+    <div class="amount">💰 1,000 FAKE</div>
     <button onclick="connectWallet()">Connect Wallet</button>
     <button onclick="claimAirdrop()">Claim Airdrop</button>
     <div id="status">Wallet not connected.</div>
@@ -58,47 +53,50 @@
   </div>
 
   <script>
-    // 🚀 Contract details
-    const CONTRACT_ADDRESS = "0x7EA0416fC7b242a040177DD6257a68E4fFad1E30"; // Sepolia
+    const { createWeb3Modal, EthereumClient, w3mConnectors, w3mProvider } = window.Web3ModalEthereum;
+    const { Web3Modal } = window.Web3ModalHtml;
+    const { ethers } = window.ethers;
+
+    // 1) Configure chains and providers
+    const chains = [11155111, 1]; // Sepolia + Mainnet
+    const projectId = "0231e84c2a6a435b8f0e7ec4d2fa7723"; // your Infura ID
+
+    const provider = w3mProvider({
+      projectId,
+      chains,
+    });
+
+    // 2) Create Ethereum client
+    const ethereumClient = new EthereumClient(provider, chains);
+
+    // 3) Create Web3Modal instance
+    const web3Modal = createWeb3Modal({
+      projectId,
+      theme: "dark",
+      accentColor: "default",
+      ethereumClient,
+    });
+
+    let signer, contract;
+    const statusEl = document.getElementById("status");
+    const CONTRACT_ADDRESS = "0x7EA0416fC7b242a040177DD6257a68E4fFad1E30";
     const ABI = [
       {"inputs":[],"name":"claimAirdrop","outputs":[],"stateMutability":"nonpayable","type":"function"},
       {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"hasClaimed","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"}
     ];
 
-    let provider, signer, contract;
-    const statusEl = document.getElementById("status");
-
     async function connectWallet() {
       try {
-        // 1️⃣ Injected wallets
-        if (window.ethereum && (window.ethereum.isMetaMask || window.ethereum.isTrust || window.ethereum.isRainbow || window.ethereum.isCoinbaseWallet)) {
-          provider = window.ethereum;
-          await provider.request({ method: "eth_requestAccounts" });
-        } else {
-          // 2️⃣ WalletConnect fallback
-          const wcProvider = new window.WalletConnectProvider.default({
-            rpc: {
-              11155111: "https://sepolia.infura.io/v3/0231e84c2a6a435b8f0e7ec4d2fa7723",
-              1: "https://mainnet.infura.io/v3/0231e84c2a6a435b8f0e7ec4d2fa7723"
-            },
-            qrcodeModalOptions: {
-              mobileLinks: ["metamask","trust","rainbow","argent","imtoken","pillar"]
-            }
-          });
-          await wcProvider.enable();
-          provider = wcProvider;
-        }
-
-        // Wrap in Ethers.js
-        const ethersProvider = new ethers.BrowserProvider(provider);
-        signer = await ethersProvider.getSigner();
+        // Opens modal: on mobile deep-link, on desktop QR
+        await web3Modal.openModal();
+        const web3Provider = new ethers.BrowserProvider(provider);
+        signer = await web3Provider.getSigner();
         const address = await signer.getAddress();
         contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-
         statusEl.innerText = `✅ Connected: ${address.slice(0,6)}…${address.slice(-4)}`;
       } catch (e) {
         console.error(e);
-        statusEl.innerText = "❌ Connection failed. Please try again.";
+        statusEl.innerText = "❌ Connection failed.";
       }
     }
 
@@ -108,10 +106,9 @@
         return;
       }
       try {
-        // Check if already claimed
         const claimed = await contract.hasClaimed(await signer.getAddress());
         if (claimed) {
-          statusEl.innerText = "❌ You have already claimed.";
+          statusEl.innerText = "❌ Already claimed.";
           return;
         }
         const tx = await contract.claimAirdrop();
@@ -120,7 +117,7 @@
         statusEl.innerText = "🎉 Airdrop claimed!";
       } catch (e) {
         console.error(e);
-        statusEl.innerText = "❌ Claim failed or rejected.";
+        statusEl.innerText = "❌ Claim failed.";
       }
     }
   </script>
