@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Airdrop Claim Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+  <script src="https://unpkg.com/web3modal@1.9.8/dist/index.js"></script>
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -15,34 +17,40 @@
     }
 
     .container {
-      max-width: 420px;
-      margin: 12vh auto;
+      max-width: 400px;
+      margin: 10vh auto;
+      background: rgba(255, 255, 255, 0.05);
       padding: 2rem;
-      background-color: rgba(255, 255, 255, 0.06);
-      border-radius: 14px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
       text-align: center;
-      box-shadow: 0 0 25px rgba(0,0,0,0.3);
     }
 
     h1 {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 10px;
     }
 
     p {
       font-size: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 20px;
       opacity: 0.9;
     }
 
+    .airdrop-amount {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #00ffae;
+    }
+
     button {
-      background: #00ffae;
+      background-color: #00ffae;
       color: #000;
       border: none;
-      padding: 14px 26px;
+      padding: 14px 24px;
       font-size: 1rem;
       font-weight: 600;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
       transition: background 0.3s ease;
     }
@@ -51,16 +59,15 @@
       background-color: #00c98e;
     }
 
-    .wallet-status {
-      margin-top: 20px;
+    .footer {
+      margin-top: 30px;
       font-size: 0.9rem;
       color: #ccc;
     }
 
-    .footer {
-      margin-top: 3rem;
-      font-size: 0.8rem;
-      color: #bbb;
+    #status {
+      margin-top: 15px;
+      color: #ff4d4d;
     }
   </style>
 </head>
@@ -68,46 +75,33 @@
   <div class="container">
     <h1>🎉 Airdrop Claim Portal</h1>
     <p>Connect your wallet to verify eligibility and claim your airdrop rewards instantly.</p>
+    <div class="airdrop-amount">💰 1,000 FAKE</div>
     <button onclick="connectWallet()">Connect Wallet</button>
-    <div class="wallet-status" id="walletStatus">Wallet not connected.</div>
-    <div class="footer">© 2025 Airdrop Distribution Inc.</div>
+    <p id="status">Wallet not connected.</p>
+    <div class="footer">© 2025 Airdrop Distribution</div>
   </div>
 
-  <!-- ✅ Web3Modal Wallet Connection Script -->
-  <script type="module">
-    import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
-    import Web3Modal from "https://cdn.jsdelivr.net/npm/web3modal@1.9.12/dist/index.es.js";
-    import WalletConnectProvider from "https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js";
-
-    const providerOptions = {
-      walletconnect: {
-        package: WalletConnectProvider,
-        options: {
-          infuraId: "0231e84c2a6a435b8f0e7ec4d2fa7723" // Your Infura Project ID
-        }
-      }
-    };
-
-    const web3Modal = new Web3Modal.default({
-      cacheProvider: false,
-      providerOptions,
-    });
+  <script>
+    let provider;
 
     async function connectWallet() {
-      const statusEl = document.getElementById("walletStatus");
       try {
+        const web3Modal = new window.Web3Modal.default({
+          cacheProvider: false,
+          providerOptions: {}
+        });
+
         const instance = await web3Modal.connect();
-        const provider = new ethers.providers.Web3Provider(instance);
-        const signer = provider.getSigner();
+        provider = new ethers.BrowserProvider(instance);
+
+        const signer = await provider.getSigner();
         const address = await signer.getAddress();
-        statusEl.textContent = `Connected wallet: ${address}`;
-      } catch (err) {
-        console.error("Wallet connection failed:", err);
-        statusEl.textContent = "Wallet connection failed. Please try again.";
+        document.getElementById("status").innerText = `✅ Connected: ${address.slice(0,6)}...${address.slice(-4)}`;
+      } catch (error) {
+        console.error(error);
+        document.getElementById("status").innerText = "❌ Wallet connection failed. Please try again.";
       }
     }
-
-    window.connectWallet = connectWallet;
   </script>
 </body>
 </html>
