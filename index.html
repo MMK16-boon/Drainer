@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Claim Your Airdrop</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://unpkg.com/web3modal@1.9.5/dist/index.js"></script>
+
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -67,9 +70,25 @@
   </div>
 
   <script>
+    let provider;
+
     async function connectWallet() {
-      alert("This is a demo. Wallet connection feature is not active.");
-      // This is where you'd connect Web3 in the future
+      try {
+        const web3Modal = new window.Web3Modal.default({
+          cacheProvider: false,
+        });
+
+        const instance = await web3Modal.connect();
+        provider = new ethers.providers.Web3Provider(instance);
+
+        const signer = provider.getSigner();
+        const address = await signer.getAddress();
+
+        alert("Wallet connected: " + address);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to connect wallet");
+      }
     }
   </script>
 </body>
