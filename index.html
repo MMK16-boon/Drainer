@@ -3,93 +3,105 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Claim Your Airdrop</title>
+  <title>Airdrop Claim Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="https://unpkg.com/web3modal@1.9.5/dist/index.js"></script>
-
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
       margin: 0;
       padding: 0;
-      color: white;
-      text-align: center;
+      background: radial-gradient(circle at top, #121212, #0c0c0c);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
-    .container {
-      max-width: 400px;
-      margin: 10vh auto;
-      padding: 2rem;
-      background-color: rgba(255, 255, 255, 0.05);
+    .card {
+      background: #1e1e1e;
+      padding: 40px;
       border-radius: 12px;
-      box-shadow: 0 0 30px rgba(0,0,0,0.2);
+      box-shadow: 0 0 20px rgba(0, 255, 160, 0.2);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
     }
 
     h1 {
       font-size: 1.8rem;
-      margin-bottom: 10px;
+      margin-bottom: 16px;
+      color: #00ffa3;
     }
 
     p {
-      font-size: 1rem;
+      color: #ccc;
       margin-bottom: 30px;
-      opacity: 0.9;
     }
 
     button {
-      background-color: #00ffae;
+      background-color: #00ffa3;
       color: #000;
       border: none;
-      padding: 14px 24px;
+      padding: 12px 22px;
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: bold;
       border-radius: 8px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: 0.3s ease;
     }
 
     button:hover {
-      background-color: #00c98e;
+      background-color: #00c388;
+    }
+
+    .wallet-address {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      word-break: break-word;
+      color: #888;
     }
 
     .footer {
-      margin-top: 30px;
-      font-size: 0.9rem;
-      color: #ccc;
+      margin-top: 40px;
+      font-size: 0.8rem;
+      color: #666;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎉 Airdrop Claim Portal</h1>
-    <p>Connect your wallet to verify eligibility and claim your airdrop rewards instantly.</p>
-    <button onclick="connectWallet()">Connect Wallet</button>
-    <div class="footer">© 2025 Airdrop Distribution Inc.</div>
+  <div class="card">
+    <h1>Claim Your Free Airdrop</h1>
+    <p>Connect your wallet to check eligibility and receive tokens.</p>
+    <button id="connectButton">Connect Wallet</button>
+    <div class="wallet-address" id="walletAddress"></div>
+    <div class="footer">© 2025 CryptoAirdrop.io</div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.10/dist/index.js"></script>
   <script>
     let provider;
+    const connectButton = document.getElementById("connectButton");
+    const walletDisplay = document.getElementById("walletAddress");
 
     async function connectWallet() {
       try {
         const web3Modal = new window.Web3Modal.default({
-          cacheProvider: false,
+          cacheProvider: false
         });
-
         const instance = await web3Modal.connect();
         provider = new ethers.providers.Web3Provider(instance);
-
         const signer = provider.getSigner();
         const address = await signer.getAddress();
-
-        alert("Wallet connected: " + address);
-      } catch (err) {
-        console.error(err);
-        alert("Failed to connect wallet");
+        walletDisplay.innerText = `Connected: ${address}`;
+      } catch (error) {
+        walletDisplay.innerText = "❌ Failed to connect wallet";
+        console.error(error);
       }
     }
+
+    connectButton.addEventListener("click", connectWallet);
   </script>
 </body>
 </html>
