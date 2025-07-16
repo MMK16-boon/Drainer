@@ -3,105 +3,113 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Airdrop Claim Portal</title>
+  <title>Claim Your Airdrop</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.8/dist/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
     body {
       font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
       margin: 0;
       padding: 0;
-      background: radial-gradient(circle at top, #121212, #0c0c0c);
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      color: white;
+      text-align: center;
     }
 
-    .card {
-      background: #1e1e1e;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 255, 160, 0.2);
-      text-align: center;
-      width: 100%;
+    .container {
       max-width: 400px;
+      margin: 10vh auto;
+      padding: 2rem;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.2);
     }
 
     h1 {
       font-size: 1.8rem;
-      margin-bottom: 16px;
-      color: #00ffa3;
+      margin-bottom: 10px;
     }
 
     p {
-      color: #ccc;
+      font-size: 1rem;
       margin-bottom: 30px;
+      opacity: 0.9;
     }
 
     button {
-      background-color: #00ffa3;
+      background-color: #00ffae;
       color: #000;
       border: none;
-      padding: 12px 22px;
+      padding: 14px 24px;
       font-size: 1rem;
-      font-weight: bold;
+      font-weight: 600;
       border-radius: 8px;
       cursor: pointer;
-      transition: 0.3s ease;
+      transition: background 0.3s ease;
+      margin-bottom: 15px;
     }
 
     button:hover {
-      background-color: #00c388;
+      background-color: #00c98e;
     }
 
-    .wallet-address {
-      margin-top: 20px;
-      font-size: 0.9rem;
-      word-break: break-word;
-      color: #888;
+    #rewardInfo {
+      margin-top: 10px;
+      font-size: 0.95rem;
+      color: #ccc;
     }
 
     .footer {
-      margin-top: 40px;
-      font-size: 0.8rem;
-      color: #666;
+      margin-top: 30px;
+      font-size: 0.9rem;
+      color: #ccc;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Claim Your Free Airdrop</h1>
-    <p>Connect your wallet to check eligibility and receive tokens.</p>
-    <button id="connectButton">Connect Wallet</button>
-    <div class="wallet-address" id="walletAddress"></div>
-    <div class="footer">© 2025 CryptoAirdrop.io</div>
+  <div class="container">
+    <h1>🎉 Airdrop Claim Portal</h1>
+    <p>Connect your wallet to verify eligibility and claim your airdrop rewards instantly.</p>
+    <button onclick="connectWallet()">Connect Wallet</button>
+    <div id="rewardInfo" style="display:none;">
+      <p><strong>Wallet:</strong> <span id="walletAddress"></span></p>
+      <p><strong>Eligible Reward:</strong> 1000 FAKE USDT</p>
+      <button onclick="claimAirdrop()">Claim Airdrop</button>
+    </div>
+    <div class="footer">© 2025 Airdrop Distribution Inc.</div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.10/dist/index.js"></script>
   <script>
+    let web3Modal;
     let provider;
-    const connectButton = document.getElementById("connectButton");
-    const walletDisplay = document.getElementById("walletAddress");
+    let signer;
+    let userAddress;
 
     async function connectWallet() {
       try {
-        const web3Modal = new window.Web3Modal.default({
-          cacheProvider: false
+        const providerOptions = {};
+        web3Modal = new window.Web3Modal.default({
+          cacheProvider: false,
+          providerOptions
         });
+
         const instance = await web3Modal.connect();
         provider = new ethers.providers.Web3Provider(instance);
-        const signer = provider.getSigner();
-        const address = await signer.getAddress();
-        walletDisplay.innerText = `Connected: ${address}`;
-      } catch (error) {
-        walletDisplay.innerText = "❌ Failed to connect wallet";
-        console.error(error);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+
+        document.getElementById('walletAddress').textContent = userAddress;
+        document.getElementById('rewardInfo').style.display = 'block';
+      } catch (e) {
+        alert("Wallet connection failed. Please try again.");
+        console.error(e);
       }
     }
 
-    connectButton.addEventListener("click", connectWallet);
+    function claimAirdrop() {
+      alert("✅ Airdrop Claimed!\n\n1000 FAKE USDT has been sent to your wallet (demo).");
+    }
   </script>
 </body>
 </html>
