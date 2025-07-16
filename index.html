@@ -1,103 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Airdrop Claim Portal</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
-  <!-- Ethers.js -->
   <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
-
   <style>
-    body { font-family: 'Inter',sans-serif; background: #0f0f0f; color: #fff; margin:0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 50px;
+    }
     .container {
-      max-width: 420px; margin: 8vh auto; padding:2rem;
-      background: #1e1e1e; border-radius:12px;
-      box-shadow:0 0 30px rgba(0,255,170,0.15); text-align:center;
+      background: #1e293b;
+      padding: 2rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 450px;
+      margin: auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
     }
-    h1 { color:#00ffae; }
-    p { color:#ccc; }
     button {
-      background:#00ffae; color:#000; padding:12px 20px;
-      border:none; border-radius:6px; font-weight:bold;
-      cursor:pointer; margin:8px;
+      background-color: #00ffae;
+      color: #000;
+      border: none;
+      padding: 14px 24px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
     }
-    button:hover { background:#00d99d; }
-    #status { margin-top:1rem; color:#ff6666; }
+    button:hover {
+      background-color: #00c98e;
+    }
+    #status {
+      margin-top: 15px;
+      font-size: 0.95rem;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎁 Airdrop Portal</h1>
-    <p>Connect your wallet and claim your free token!</p>
-    <button id="btnConnect">Connect Wallet</button>
-    <button id="btnClaim" disabled>Claim Airdrop</button>
+    <h1>🎉 Airdrop Claim Portal</h1>
+    <p>Connect your wallet and claim your airdrop instantly.</p>
+    <button onclick="connectWallet()">Connect Wallet</button>
+    <button onclick="claimAirdrop()">Claim Airdrop</button>
     <div id="status"></div>
   </div>
 
   <script>
-    // YOUR AIRDROP CONTRACT
-    const AIRDROP_CONTRACT = "0x7EA0416fC7b242a040177DD6257a68E4fFad1E30";
-
-    // ABI from Remix
-    const ABI = [
+    const contractAddress = "0x7EA0416fC7b242a040177DD6257a68E4fFad1E30"; // your deployed contract
+    const abi = [ // only required parts from your ABI
       {
-        "inputs": [
-          { "internalType":"address","name":"_tokenAddress","type":"address" },
-          { "internalType":"uint256","name":"_airdropAmount","type":"uint256" }
-        ],
-        "stateMutability":"nonpayable","type":"constructor"
+        "inputs": [],
+        "name": "claimAirdrop",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
-        "anonymous":false,
-        "inputs":[
-          { "indexed":true,"internalType":"address","name":"user","type":"address" },
-          { "indexed":false,"internalType":"uint256","name":"amount","type":"uint256" }
-        ],
-        "name":"AirdropClaimed","type":"event"
-      },
-      {"inputs":[],"name":"airdropAmount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-      {"inputs":[],"name":"claimAirdrop","outputs":[],"stateMutability":"nonpayable","type":"function"},
-      {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"hasClaimed","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
-      {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
-      {"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"setAirdropAmount","outputs":[],"stateMutability":"nonpayable","type":"function"},
-      {"inputs":[],"name":"tokenAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
-      {"inputs":[],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"},
-      {"stateMutability":"payable","type":"receive"}
+        "inputs": [],
+        "name": "hasClaimed",
+        "outputs": [{"internalType": "bool","name": "","type": "bool"}],
+        "stateMutability": "view",
+        "type": "function"
+      }
     ];
 
-    let provider, signer, contract;
-    const statusEl = document.getElementById("status");
-    const btnConnect = document.getElementById("btnConnect");
-    const btnClaim   = document.getElementById("btnClaim");
+    let provider;
+    let signer;
+    let contract;
 
-    // Connect wallet and prepare contract instance
-    btnConnect.onclick = async () => {
-      if(!window.ethereum) {
-        statusEl.innerText = "Please install MetaMask!";
+    async function connectWallet() {
+      try {
+        if (!window.ethereum) {
+          document.getElementById("status").innerText = "MetaMask not detected.";
+          return;
+        }
+
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        contract = new ethers.Contract(contractAddress, abi, signer);
+
+        const address = await signer.getAddress();
+        document.getElementById("status").innerText = "Wallet connected: " + address;
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").innerText = "Failed to connect wallet.";
+      }
+    }
+
+    async function claimAirdrop() {
+      if (!contract) {
+        document.getElementById("status").innerText = "Connect wallet first.";
         return;
       }
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      signer = provider.getSigner();
-      contract = new ethers.Contract(AIRDROP_CONTRACT, ABI, signer);
-      statusEl.innerText = "✅ Wallet connected";
-      btnClaim.disabled = false;
-    };
 
-    // Call claimAirdrop()
-    btnClaim.onclick = async () => {
       try {
-        statusEl.innerText = "⏳ Claiming...";
+        const hasClaimed = await contract.hasClaimed(await signer.getAddress());
+        if (hasClaimed) {
+          document.getElementById("status").innerText = "You already claimed this airdrop.";
+          return;
+        }
+
         const tx = await contract.claimAirdrop();
+        document.getElementById("status").innerText = "Claiming... Please confirm in MetaMask.";
         await tx.wait();
-        statusEl.innerText = "🎉 Claimed!";
-      } catch (e) {
-        console.error(e);
-        statusEl.innerText = "❌ Claim failed";
+        document.getElementById("status").innerText = "✅ Airdrop successfully claimed!";
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").innerText = "❌ Claim failed: " + err.message;
       }
-    };
+    }
   </script>
 </body>
 </html>
