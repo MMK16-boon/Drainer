@@ -1,51 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Airdrop Claim</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Claim Your Airdrop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
-      background: #0f0f0f;
-      color: #fff;
-      font-family: sans-serif;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      margin: 0;
+      padding: 0;
+      color: white;
       text-align: center;
-      padding: 50px;
     }
-    .box {
-      background: #1f1f1f;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 10px #00f2ff;
+
+    .container {
+      max-width: 400px;
+      margin: 10vh auto;
+      padding: 2rem;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.2);
     }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1rem;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+
     button {
-      background: #00f2ff;
+      background-color: #00ffae;
+      color: #000;
       border: none;
-      padding: 15px 30px;
-      border-radius: 10px;
-      font-size: 16px;
+      padding: 14px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
       cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #00c98e;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 0.9rem;
+      color: #ccc;
     }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h1>Claim Your Airdrop</h1>
-    <p>Connect your wallet to get free $AIR tokens</p>
+  <div class="container">
+    <h1>🎉 Airdrop Claim Portal</h1>
+    <p>Connect your wallet to verify eligibility and claim your airdrop rewards instantly.</p>
     <button onclick="connectWallet()">Connect Wallet</button>
+    <div class="footer">© 2025 Airdrop Distribution Inc.</div>
   </div>
 
   <script>
     async function connectWallet() {
-      if (window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          alert('Wallet connected: ' + accounts[0]);
-        } catch (err) {
-          alert('Connection rejected');
-        }
-      } else {
-        alert('MetaMask not found');
-      }
+      alert("This is a demo. Wallet connection feature is not active.");
+      // This is where you'd connect Web3 in the future
     }
   </script>
 </body>
