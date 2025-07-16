@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Airdrop Claim</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: #0f0f0f;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    .box {
+      background: #1f1f1f;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px #00f2ff;
+    }
+    button {
+      background: #00f2ff;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Claim Your Airdrop</h1>
+    <p>Connect your wallet to get free $AIR tokens</p>
+    <button onclick="connectWallet()">Connect Wallet</button>
+  </div>
+
+  <script>
+    async function connectWallet() {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          alert('Wallet connected: ' + accounts[0]);
+        } catch (err) {
+          alert('Connection rejected');
+        }
+      } else {
+        alert('MetaMask not found');
+      }
+    }
+  </script>
+</body>
+</html>
